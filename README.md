@@ -4,6 +4,12 @@ A collection of browser userscipts for various websites.
 
 These have been tested in [Tampermonkey](https://www.tampermonkey.net/) ([Chome](https://chromewebstore.google.com/detail/tampermonkey/dhdgffkkebhmkfjojejmpbldmpobfkfo), [Edge](https://microsoftedge.microsoft.com/addons/detail/tampermonkey/iikmkjmpaadaobahmlepeloendndfphd), [Firefox](https://addons.mozilla.org/en-US/firefox/addon/tampermonkey/), [Safari](https://apps.apple.com/us/app/tampermonkey/id1482490089), [Opera](https://addons.opera.com/en/extensions/details/tampermonkey-beta/)), though they should work in an Greasemonkey compatible userscript addin.
 
+## All Sites
+
+### Show Word Definition [[Source](Show%20Word%20Definition.user.js)] [[Install](Show%20Word%20Definition.user.js?raw=1)]
+
+When a word is selected a book icon is displayed beneith, when clicked the definition of the word is displayed. The definitions are retreived fom [dictionaryapi.dev](https://dictionaryapi.dev/).
+
 ## Stack Overflow
 
 ### Return Homepage Hot Questions [[Source](Stack%20Overflow%20-%20return%20homepage%20hot%20questsions.user.js)] [[Install](Stack%20Overflow%20-%20return%20homepage%20hot%20questsions.user.js?raw=1)]
