@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Stack Overflow: Return Homepage Hot Questsions
 // @namespace    jimbojim1997
-// @version      2024-11-09
+// @version      2024-12-19
 // @description  Add the Stack Exchange hot questsions back to the Stack Overflow home page.
 // @author       jimbojim1997
 // @match        https://stackoverflow.com/
@@ -56,12 +56,15 @@
         container.appendChild(ul);
 
         for (const entry of questions) {
+            const url = new URL(entry.url);
+
             const li = document.createElement("li");
             li.className = "s-sidebarwidget--item d-flex px16";
             ul.appendChild(li);
 
-            const faviconContainer = document.createElement("div");
+            const faviconContainer = document.createElement("a");
             faviconContainer.className = "flex--item1 fl-shrink0";
+            faviconContainer.href = `${url.protocol}//${url.host}`;
             li.appendChild(faviconContainer);
 
             const favicon = document.createElement("div");
@@ -75,7 +78,7 @@
             const link = document.createElement("a");
             link.className = "fc-black-600";
             link.innerText = entry.title;
-            link.href = entry.url;
+            link.href = url.toString();
             linkContainer.appendChild(link);
         }
     }
