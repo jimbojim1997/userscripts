@@ -48,7 +48,7 @@
 
         const sectionTitle = document.createElement("div");
         sectionTitle.innerText = "Hot Questions";
-        sectionTitle.className = "d-flex fc-black-600 pt16 pl16 fs-body2 fw-bold";
+        sectionTitle.className = "s-sidebarwidget--header";
         container.appendChild(sectionTitle);
 
         const ul = document.createElement("ul");
