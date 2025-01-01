@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Stack Overflow: Return Homepage Hot Questsions
 // @namespace    jimbojim1997
-// @version      2024-12-19
+// @version      2025-01-01
 // @description  Add the Stack Exchange hot questsions back to the Stack Overflow home page.
 // @author       jimbojim1997
 // @match        https://stackoverflow.com/
