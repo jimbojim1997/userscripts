@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Stack Overflow: Return Homepage Hot Questsions
 // @namespace    jimbojim1997
-// @version      2025-01-01
+// @version      2025-01-28
 // @description  Add the Stack Exchange hot questsions back to the Stack Overflow home page.
 // @author       jimbojim1997
 // @match        https://stackoverflow.com/
@@ -23,14 +23,14 @@
     //End Configuration
 
     const hotQuestionsPromise = getHotQuestionsAsync();
-    const widget = await elementCreatedAsync("#sidebar > .s-sidebarwidget:nth-child(2)");
+    const widget = await elementCreatedAsync(".sidebar > .s-sidebarwidget:nth-child(1)");
     const hotQuestions = await hotQuestionsPromise;
-    if (hotQuestions) addHotQuestsionsToPage(hotQuestions.entries, widget);
+    if (hotQuestions) addHotQuestionsToPage(hotQuestions.entries, widget);
 
-    async function getHotQuestionsAsync() {
+    async function getHotQuestionsAsync(bypassCache = false) {
         const nowMs = new Date().getTime();
         const cacheDateMs = GM_getValue("cacheDateMs");
-        if (cacheDateMs && nowMs - maxCacheAgeMs < cacheDateMs) return Promise.resolve(GM_getValue("hotQuestions"));
+        if (!bypassCache && cacheDateMs && nowMs - maxCacheAgeMs < cacheDateMs) return Promise.resolve(GM_getValue("hotQuestions"));
 
         return httpRequestAsync({
             method: "GET",
@@ -43,24 +43,49 @@
         });
     }
 
-    function addHotQuestsionsToPage(questions, container) {
+    function addHotQuestionsToPage(questions, container) {
         if (!questions || questions.length === 0) return;
-
-        const sectionTitle = document.createElement("div");
-        sectionTitle.innerText = "Hot Questions";
-        sectionTitle.className = "s-sidebarwidget--header";
-        container.appendChild(sectionTitle);
 
         const ul = document.createElement("ul");
         ul.className = "ml0";
+
+        {
+            const sectionTitle = document.createElement("div");
+            const text = document.createTextNode("Hot Questions");
+            sectionTitle.appendChild(text);
+
+            const refresh = document.createElement("button");
+            refresh.innerText = "↻";
+            refresh.style.border = "none";
+            refresh.style.background = "none";
+            refresh.style.color = "inherit";
+            refresh.style.cursor = "pointer";
+            refresh.addEventListener("click", async e => {
+                refresh.style.cursor = "wait";
+                const hotQuestions = await getHotQuestionsAsync(true);
+                addHotQuestionsToList(hotQuestions.entries, ul);
+                refresh.style.cursor = "pointer";
+            });
+
+            sectionTitle.appendChild(refresh);
+
+            sectionTitle.className = "s-sidebarwidget--header";
+            container.appendChild(sectionTitle);
+        }
+        
         container.appendChild(ul);
 
+        addHotQuestionsToList(questions, ul);
+    }
+
+    function addHotQuestionsToList(questions, list) {
+        list.innerHTML = "";
         for (const entry of questions) {
             const url = new URL(entry.url);
 
             const li = document.createElement("li");
             li.className = "s-sidebarwidget--item d-flex px16";
-            ul.appendChild(li);
+            list.appendChild(li);
 
             const faviconContainer = document.createElement("a");
             faviconContainer.className = "flex--item1 fl-shrink0";
