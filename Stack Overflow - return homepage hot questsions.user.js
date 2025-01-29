@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Stack Overflow: Return Homepage Hot Questsions
 // @namespace    jimbojim1997
-// @version      2025-01-28
+// @version      2025-01-29
 // @description  Add the Stack Exchange hot questsions back to the Stack Overflow home page.
 // @author       jimbojim1997
 // @match        https://stackoverflow.com/
@@ -23,7 +23,7 @@
     //End Configuration
 
     const hotQuestionsPromise = getHotQuestionsAsync();
-    const widget = await elementCreatedAsync(".sidebar > .s-sidebarwidget:nth-child(1)");
+    const widget = await elementCreatedAsync("#sidebar > .s-sidebarwidget:nth-child(2)");
     const hotQuestions = await hotQuestionsPromise;
     if (hotQuestions) addHotQuestionsToPage(hotQuestions.entries, widget);
 
