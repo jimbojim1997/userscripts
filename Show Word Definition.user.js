@@ -1,11 +1,10 @@
 // ==UserScript==
 // @name         Show Word Definition
 // @namespace    jimbojim1997
-// @version      2024-11-11
+// @version      2025-01-30
 // @description  Show the definition of the selected word.
 // @author       jimbojim1997
 // @match        https://*/*
-// @grant        GM_addStyle
 // @grant        GM_xmlhttpRequest
 // @connect      dictionaryapi.dev
 // @run-at       document-start
@@ -13,138 +12,148 @@
 
 (function() {
     'use strict';
-
-    GM_addStyle(`
-    .swdd-show-definition-button {position: absolute; background: transparent; border: none; padding: 0; margin: 0; transform: translate(-50%, 0); cursor: pointer; font-size: 20px; z-index: 1005;}
-    .swdd-popup {position: absolute; transform: translate(-50%, 0); display: flex; flex-flow: column nowrap; align-items: center; z-index: 1000; font-size: 1em; max-width: min(50em, 90vw);}
-    .swdd-popup-arrow {background: #16C60C; width: 20px; height: 20px; transform: translate(0, 10px) rotate(45deg); z-index: 1001;}
-    .swdd-popup-content {border: 2px solid #16C60C; border-radius: 5px; background: white; color: black; overflow: hidden; padding: 5px; z-index: 1002;}
-    .swdd-definition-container {display: flex; flex-flow: column nowrap;}
-
-    .sswd-word-text {font-weight: bold; margin-right: 1em;}
-    .sswd-word-phonetic {}
-    .sswd-word-meanings {padding-left: 1em;}
-    .sswd-word-meaning-part {font-style: italic;}
-    `);
+    const CUSTOM_ELEMENT = "ab17cfcf-8297-4c22-b9ad-f98ec4ca603c";
 
     document.addEventListener("selectionchange", onSelectionChange);
     document.addEventListener("click", onAnyClick);
+    window.addEventListener("resize", onResize);
 
     function onSelectionChange(event) {
-        for (const el of document.querySelectorAll(".swdd-show-definition-button")) el.parentElement.removeChild(el);
+        for (const el of document.querySelectorAll(`${CUSTOM_ELEMENT}:not([open])`)) el.parentElement.removeChild(el);
 
         const selection = window.getSelection();
         for (let i = 0; i < selection.rangeCount; i++) {
             const range = selection.getRangeAt(i);
             if (range.startOffset === range.endOffset) continue;
 
-            const bounds = range.getBoundingClientRect();
-            const button = document.createElement("button");
-            button.className = "swdd-show-definition-button";
-            button.innerText = "📗";
-            button.style.top = `${window.scrollY + bounds.bottom}px`;
-            button.style.left = `${window.scrollX + (bounds.left + bounds.right) / 2}px`;
-            button.addEventListener("click", e => onDefinitionButtonClick(e, range));
-            document.body.appendChild(button);
+            const popup = document.createElement(CUSTOM_ELEMENT);
+            popup.range = range;
+            document.body.appendChild(popup);
         }
     }
 
-    function onAnyClick(event) {
-        if (!event.target.closest(".swdd-popup, .swdd-show-definition-button")) {
-            for (const el of document.querySelectorAll(".swdd-popup")) el.parentElement.removeChild(el);
+    function onAnyClick(e) {
+        if (!e.target.matches(CUSTOM_ELEMENT)) {
+            const selection = window.getSelection();
+            if (selection.rangeCount === 0) {
+                for (const el of document.querySelectorAll(CUSTOM_ELEMENT)) el.parentElement.removeChild(el);
+            } else if (selection.rangeCount === 1) {
+                const range = selection.getRangeAt(0);
+                if (range.startOffset === range.endOffset) {
+                    for (const el of document.querySelectorAll(CUSTOM_ELEMENT)) el.parentElement.removeChild(el);
+                }
+
+            }
         }
     }
 
-    async function onDefinitionButtonClick(event, range) {
-        const text = range.toString().trim();
-        const response = await httpRequestAsync({
-            method: "GET",
-            url: `https://api.dictionaryapi.dev/api/v2/entries/en/${text}`
-        });
-
-        const [popup, popupContent] = createPopup();
-        document.body.appendChild(popup);
-        {
-            const bounds = range.getBoundingClientRect();
-            popup.style.top = `${window.scrollY + bounds.bottom}px`;
-            popup.style.left = `${window.scrollX + (bounds.left + bounds.right) / 2}px`;
-        }
-
-        const data = JSON.parse(response.responseText);
-        if (data instanceof Array) {
-            const content = createDefinitionContent(data[0]);
-            popupContent.appendChild(content);
-        } else if (data instanceof Object) {
-            popupContent.innerText = data.title;
-        }
-
-        {
-            const bounds = popupContent.getBoundingClientRect();
-            if (bounds.left < 0) popupContent.style.transform = `translateX(${Math.abs(bounds.left)}px)`;
-            else if (bounds.right > document.body.clientWidth) popupContent.style.transform = `translateX(${bounds.right - document.body.clientWidth}px)`;
-        }
-
-        event.target.parentElement.removeChild(event.target);
+    function onResize(e) {
+        for (const el of document.querySelectorAll(CUSTOM_ELEMENT)) el.reposition();
     }
 
-    function createPopup() {
-        const container = document.createElement("div");
-        container.className = "swdd-popup";
+    customElements.define(CUSTOM_ELEMENT, class extends HTMLElement {
+        #range = null;
+        #root = null;
 
-        const arrow = document.createElement("div");
-        arrow.className = "swdd-popup-arrow";
-        container.appendChild(arrow);
+        constructor() {
+            super();
+        }
 
-        const inner = document.createElement("div");
-        inner.className = "swdd-popup-content";
-        container.appendChild(inner);
+        #populateWordInfo(wordInfo) {
+            const popup = this.#root.getElementById("popup");
+            popup.removeAttribute("hidden");
 
-        return [container, inner];
-    }
-
-    function createDefinitionContent(wordInfo) {
-        const content = document.createElement("div");
-        content.className = "swdd-definition-container";
-
-        {
-            const header = document.createElement("div");
-            content.appendChild(header);
-
-            const word = document.createElement("span");
-            word.className = "sswd-word-text";
-            word.innerText = wordInfo.word;
-            header.appendChild(word);
+            popup.querySelector("#word").innerText = wordInfo.word;
 
             const phonetic = wordInfo.phonetics?.length > 0 ? wordInfo.phonetics[0].text : wordInfo.phonetic;
-            if (phonetic) {
-                const el = document.createElement("span");
-                el.className = "sswd-word-phonetic";
-                el.innerText = phonetic;
-                header.appendChild(el);
+            if (phonetic) popup.querySelector("#phonetic").innerText = phonetic;
+
+            const meaningList = popup.querySelector("#meanings");
+            for (const meaning of wordInfo.meanings) {
+                for (const definition of meaning.definitions) {
+                    const li = document.createElement("li");
+                    meaningList.appendChild(li);
+
+                    const part = document.createElement("span");
+                    part.className = "part-of-speech";
+                    part.innerText = meaning.partOfSpeech;
+                    li.appendChild(part);
+                    li.appendChild(document.createTextNode(": "));
+                    li.appendChild(document.createTextNode(definition.definition));
+                }
+            }
+            this.reposition();
+        };
+
+        async #onShowDefinitionClick(e) {
+            this.setAttribute("open", "");
+            const showDefinition = this.#root.getElementById("show-definition");
+            showDefinition.style.cursor = "wait";
+
+            const query = this.#range.toString().trim();
+            const response = await httpRequestAsync({
+                method: "GET",
+                url: `https://api.dictionaryapi.dev/api/v2/entries/en/${query}`
+            });
+            showDefinition.setAttribute("hidden", "");
+
+            const data = JSON.parse(response.responseText);
+            if (data instanceof Array) {
+                const wordInfo = data[0];
+                this.#populateWordInfo(wordInfo);
+            } else {
+                this.#root.getElementById("unknown").removeAttribute("hidden");
             }
         }
 
-        const meaningsList = document.createElement("ul");
-        meaningsList.className = "sswd-word-meanings";
-        content.appendChild(meaningsList);
+        connectedCallback() {
+            if (this.#root) return;
+            const root = this.#root = this.attachShadow({mode: "closed"});
+            root.innerHTML = `
+<style>
+:host {display: block; position: absolute; font-size: 15px;}
+[hidden] {display: none !important;}
+#show-definition {position: absolute; background: none; border: none; padding: 0; margin: 0; transform: translate(-50%, 0); cursor: pointer; font-size: 20px; z-index: 1005;}
+#unknown {position: absolute; background: none; border: none; color: red; padding: 0; margin: 0; transform: translate(-50%, 0); font-size: 20px; z-index: 1005;}
+#popup {position: absolute; transform: translate(-50%, 0); display: flex; flex-flow: column nowrap; align-items: center; z-index: 1000; font-size: 1em; max-width: 90vw;}
+#popup-arrow {background: #16C60C; width: 20px; height: 20px; transform: translate(0, 10px) rotate(45deg); z-index: 1001;}
+#popup-content {border: 2px solid #16C60C; border-radius: 5px; background: white; color: black; padding: 5px; z-index: 1002; overflow: auto;}
+#heading {font-weight: normal; font-size: 1.2em; margin: 0;}
+#word {font-weight: bold; margin-right: 0.5em;}
+#phonetic {}
+#meanings {padding-left: 1em; white-space: pre; margin: 0;}
+.part-of-speech {font-style: italic;}
+</style>
+<button id="show-definition">📗</button>
+<div id="unknown" hidden>⁉</div>
+<div id="popup" hidden>
+<div id="popup-arrow"></div>
+<div id="popup-content">
+<h1 id="heading"><span id="word"></span> <span id="phonetic"></span></h1>
+<ul id="meanings"></ul>
+</div>
+</div>
+            `;
 
-        for (const meaning of wordInfo.meanings) {
-            for (const definition of meaning.definitions) {
-                const li = document.createElement("li");
-                meaningsList.appendChild(li);
-
-                const part = document.createElement("span");
-                part.className = "sswd-word-meaning-part";
-                part.innerText = `${meaning.partOfSpeech}: `;
-                li.appendChild(part);
-
-                const def = document.createElement("span");
-                def.innerText = definition.definition;
-                li.appendChild(def);
-            }
+            const showDefinition = root.getElementById("show-definition");
+            showDefinition.addEventListener("click", this.#onShowDefinitionClick.bind(this));
         }
-        return content;
-    }
+
+        reposition() {
+            const bounds = this.#range.getBoundingClientRect();
+            this.style.top = `${window.scrollY + bounds.bottom}px`;
+            this.style.left = `${window.scrollX + (bounds.left + bounds.right) / 2}px`;
+        }
+
+        set range(value) {
+            this.#range = value;
+            this.reposition();
+        }
+
+        get range() {
+            return this.#range;
+        }
+    });
 
     async function httpRequestAsync(options) {
         return new Promise((resolve, reject) => {
