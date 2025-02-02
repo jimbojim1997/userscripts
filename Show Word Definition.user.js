@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Show Word Definition
 // @namespace    jimbojim1997
-// @version      2025-01-30
+// @version      2025-02-02
 // @description  Show the definition of the selected word.
 // @author       jimbojim1997
 // @match        https://*/*
@@ -54,9 +54,15 @@
     customElements.define(CUSTOM_ELEMENT, class extends HTMLElement {
         #range = null;
         #root = null;
+        #resizeObserver = null;
+
+        #onResize(e) {
+            this.style.setProperty("--width", `${this.clientWidth}px`);
+        }
 
         constructor() {
             super();
+            this.#resizeObserver = new ResizeObserver(this.#onResize.bind(this));
         }
 
         #populateWordInfo(wordInfo) {
@@ -107,11 +113,13 @@
         }
 
         connectedCallback() {
+            this.#resizeObserver.observe(this);
+
             if (this.#root) return;
             const root = this.#root = this.attachShadow({mode: "closed"});
             root.innerHTML = `
 <style>
-:host {display: block; position: absolute; font-size: 15px; transform: translate(-50%, 0); max-width: 90vw;}
+:host {display: block; position: absolute; font-size: 15px; max-width: 90vw;}
 [hidden] {display: none !important;}
 #show-definition {background: none; border: none; padding: 0; margin: 0; cursor: pointer; font-size: 20px; z-index: 1005;}
 #unknown { background: none; border: none; color: red; padding: 0; margin: 0; font-size: 20px; z-index: 1005;}
@@ -139,10 +147,14 @@
             showDefinition.addEventListener("click", this.#onShowDefinitionClick.bind(this));
         }
 
+        disconnectedCallback() {
+            this.#resizeObserver.unobserve(this);
+        }
+
         reposition() {
             const bounds = this.#range.getBoundingClientRect();
             this.style.top = `${window.scrollY + bounds.bottom}px`;
-            this.style.left = `${window.scrollX + (bounds.left + bounds.right) / 2}px`;
+            this.style.left = `calc(${window.scrollX + (bounds.left + bounds.right) / 2}px - (var(--width) / 2))`;
         }
 
         set range(value) {
