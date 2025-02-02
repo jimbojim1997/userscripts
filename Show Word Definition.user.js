@@ -111,17 +111,17 @@
             const root = this.#root = this.attachShadow({mode: "closed"});
             root.innerHTML = `
 <style>
-:host {display: block; position: absolute; font-size: 15px;}
+:host {display: block; position: absolute; font-size: 15px; transform: translate(-50%, 0); max-width: 90vw;}
 [hidden] {display: none !important;}
-#show-definition {position: absolute; background: none; border: none; padding: 0; margin: 0; transform: translate(-50%, 0); cursor: pointer; font-size: 20px; z-index: 1005;}
-#unknown {position: absolute; background: none; border: none; color: red; padding: 0; margin: 0; transform: translate(-50%, 0); font-size: 20px; z-index: 1005;}
-#popup {position: absolute; transform: translate(-50%, 0); display: flex; flex-flow: column nowrap; align-items: center; z-index: 1000; font-size: 1em; max-width: 90vw;}
+#show-definition {background: none; border: none; padding: 0; margin: 0; cursor: pointer; font-size: 20px; z-index: 1005;}
+#unknown { background: none; border: none; color: red; padding: 0; margin: 0; font-size: 20px; z-index: 1005;}
+#popup {display: flex; flex-flow: column nowrap; align-items: center; z-index: 1000; font-size: 1em; }
 #popup-arrow {background: #16C60C; width: 20px; height: 20px; transform: translate(0, 10px) rotate(45deg); z-index: 1001;}
-#popup-content {border: 2px solid #16C60C; border-radius: 5px; background: white; color: black; padding: 5px; z-index: 1002; overflow: auto;}
+#popup-content {border: 2px solid #16C60C; border-radius: 5px; background: white; color: black; padding: 5px; z-index: 1002; }
 #heading {font-weight: normal; font-size: 1.2em; margin: 0;}
 #word {font-weight: bold; margin-right: 0.5em;}
 #phonetic {}
-#meanings {padding-left: 1em; white-space: pre; margin: 0;}
+#meanings {padding-left: 1em; margin: 0;}
 .part-of-speech {font-style: italic;}
 </style>
 <button id="show-definition">📗</button>
