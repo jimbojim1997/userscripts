@@ -12,6 +12,10 @@ When a word is selected a book icon is displayed beneith, when clicked the defin
 
 ## Stack Exchange
 
+#### Stack Exchange: Highlight comment names [[Source](Stack%20Exchange%20-%20highlight%20comment%20names.user.js)] [[Install](Stack%20Exchange%20-%20highlight%20comment%20names.user.js?raw=1)]
+
+When a user is @mentioned in a comment, hover over their user name to highlight their other comments in the thread.
+
 ### Stack Overflow
 
 #### Return Homepage Hot Questions [[Source](Stack%20Overflow%20-%20return%20homepage%20hot%20questsions.user.js)] [[Install](Stack%20Overflow%20-%20return%20homepage%20hot%20questsions.user.js?raw=1)]
