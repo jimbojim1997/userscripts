@@ -10,6 +10,12 @@ These have been tested in [Tampermonkey](https://www.tampermonkey.net/) ([Chome]
 
 When a word is selected a book icon is displayed beneith, when clicked the definition of the word is displayed. The definitions are retreived fom [dictionaryapi.dev](https://dictionaryapi.dev/).
 
+## BBC Good Food
+
+### Screen Wake Lock [[Source](BBC%20Good%20Food%20-%20Screen%20Wake%20Lock.user.js)] [[Install](BBC%20Good%20Food%20-%20Screen%20Wake%20Lock.user.js?raw=1)]
+
+Keep the screen awake when viewing a recipe. A checkbox is added below the *Save to My Food* button, when checked the screen will remain awake as long as the recipe tab is visible.
+
 ## Stack Exchange
 
 #### Stack Exchange: Highlight comment names [[Source](Stack%20Exchange%20-%20highlight%20comment%20names.user.js)] [[Install](Stack%20Exchange%20-%20highlight%20comment%20names.user.js?raw=1)]
