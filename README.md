@@ -33,3 +33,9 @@ Adds Stack Exchange hot questsions back to the Stack Overflow home page; they're
 #### Order By Bytes [[Source](https://github.com/jimbojim1997/userscripts/blob/main/Code%20Golf%20-%20order%20by%20bytes.user.js)] [[Install](https://github.com/jimbojim1997/userscripts/raw/refs/heads/main/Code%20Golf%20-%20order%20by%20bytes.user.js)]
 
 Adds two options to the _Sorted by_ droplist to order the answers by how many bytes are used in the solution.
+
+## Travelling Man
+
+### Products In Series [[Source](https://github.com/jimbojim1997/userscripts/blob/main/Travelling%20Man%20-%20Products%20In%20Series.user.js)] [[Install](https://github.com/jimbojim1997/userscripts/raw/refs/heads/main/Travelling%20Man%20-%20Products%20In%20Series.user.js)]
+
+Adds a *Products In Series* section to book product pages which contains all other volumes of the current book.
